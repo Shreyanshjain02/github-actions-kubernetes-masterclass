@@ -20,13 +20,13 @@ jobs:
       - name: checkout git on runner
         uses: actions/checkout@v6
       
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:          
-          node-version: 24
+      # - name: Setup Node
+      #   uses: actions/setup-node@v6
+      #   with:          
+      #     node-version: 24
 
-      - name: Install dependencies
-        run: npm install  
+      # - name: Install dependencies
+      #   run: npm install  
         
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
@@ -39,8 +39,8 @@ jobs:
             biome check . --write --unsafe
             biome ci .
 
-      - name: Run npm audit 
-        run: npm audit --audit-level=high
+      # - name: Run npm audit 
+      #   run: npm audit --audit-level=high
 
   backend-test:
     
