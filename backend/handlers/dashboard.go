@@ -11,23 +11,75 @@ import (
 func GetDashboard(c *gin.Context) {
 	var dash models.Dashboard
 
-	database.DB.QueryRow("SELECT COUNT(*) FROM skills").Scan(&dash.TotalSkills)
-	database.DB.QueryRow("SELECT COALESCE(SUM(hours), 0) FROM learning_logs").Scan(&dash.TotalHours)
-	database.DB.QueryRow("SELECT COUNT(*) FROM learning_logs").Scan(&dash.TotalLogs)
+	err := database.DB.QueryRow(
+		"SELECT COUNT(*) FROM skills",
+	).Scan(&dash.TotalSkills)
 
-	err := database.DB.QueryRow(`
-		SELECT s.name FROM skills s
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to fetch total skills",
+		})
+		return
+	}
+
+	err = database.DB.QueryRow(
+		"SELECT COALESCE(SUM(hours), 0) FROM learning_logs",
+	).Scan(&dash.TotalHours)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to fetch total hours",
+		})
+		return
+	}
+
+	err = database.DB.QueryRow(
+		"SELECT COUNT(*) FROM learning_logs",
+	).Scan(&dash.TotalLogs)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to fetch total logs",
+		})
+		return
+	}
+
+	err = database.DB.QueryRow(`
+		SELECT s.name
+		FROM skills s
 		LEFT JOIN learning_logs l ON s.id = l.skill_id
 		GROUP BY s.id, s.name
 		ORDER BY COALESCE(SUM(l.hours), 0) DESC
 		LIMIT 1
 	`).Scan(&dash.TopSkill)
+
 	if err != nil {
 		dash.TopSkill = "N/A"
 	}
 
 	c.JSON(http.StatusOK, dash)
 }
+
+// func GetDashboard(c *gin.Context) {
+// 	var dash models.Dashboard
+
+// 	database.DB.QueryRow("SELECT COUNT(*) FROM skills").Scan(&dash.TotalSkills)
+// 	database.DB.QueryRow("SELECT COALESCE(SUM(hours), 0) FROM learning_logs").Scan(&dash.TotalHours)
+// 	database.DB.QueryRow("SELECT COUNT(*) FROM learning_logs").Scan(&dash.TotalLogs)
+
+// 	err := database.DB.QueryRow(`
+// 		SELECT s.name FROM skills s
+// 		LEFT JOIN learning_logs l ON s.id = l.skill_id
+// 		GROUP BY s.id, s.name
+// 		ORDER BY COALESCE(SUM(l.hours), 0) DESC
+// 		LIMIT 1
+// 	`).Scan(&dash.TopSkill)
+// 	if err != nil {
+// 		dash.TopSkill = "N/A"
+// 	}
+
+// 	c.JSON(http.StatusOK, dash)
+// }
 
 func HealthCheck(c *gin.Context) {
 	err := database.DB.Ping()
