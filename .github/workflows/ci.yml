@@ -35,7 +35,9 @@ jobs:
 
       - name: Run Biome
         working-directory: "./frontend"  
-        run: biome ci .
+        run: |
+            biome check . --write
+            biome ci .
 
       - name: Run npm audit 
         run: npm audit --audit-level=high
@@ -57,7 +59,9 @@ jobs:
           cache: true
       
       - name: Download dependencies
-        run: go mod download
+        run: |
+            go mod tidy
+            go mod download
 
       - name: Setup golangci-lint
         uses: golangci/golangci-lint-action@v6
