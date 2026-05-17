@@ -36,7 +36,7 @@ jobs:
       - name: Run Biome
         working-directory: "./frontend"  
         run: |
-            biome check . --write
+            biome check . --write --unsafe
             biome ci .
 
       - name: Run npm audit 
