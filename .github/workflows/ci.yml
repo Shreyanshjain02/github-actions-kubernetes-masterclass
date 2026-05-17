@@ -10,7 +10,76 @@ on:
       - '**/*.md'
 
 jobs:
+  frontend-test:
+
+    runs-on: ubuntu-latest
+    defaults: 
+      run: 
+        working-directory: ./frontend
+    steps:
+      - name: checkout giton runner
+        uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci  
+        
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: "latest"          
+
+      - name: Run Biome
+        working-directory: "./frontend"  
+        run: biome ci .
+
+      - name: Run npm audit 
+        run: npm audit --audit-level=high
+
+  backend-test:
+    
+    runs-on: ubuntu-latest
+    defaults: 
+      run: 
+        working-directory: ./backend
+    steps:
+      - name: checkout giton runner
+        uses: actions/checkout@v4
+      
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+      
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Setup golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ./backend
+
+      - name: Run golangci-lint
+        run: golangci-lint run
+
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: ./...
+
   build-and-push:
+    needs:
+      - frontend-test
+      - backend-test
+    
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +97,8 @@ jobs:
         with:
           context: ./backend
           push: ${{ vars.DEPLOY_ENABLED == 'true' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME != '' && format('{0}/skillpulse-backend:latest', secrets.DOCKERHUB_USERNAME) || 'skillpulse-backend:latest' }}
             ${{ secrets.DOCKERHUB_USERNAME != '' && format('{0}/skillpulse-backend:{1}', secrets.DOCKERHUB_USERNAME, github.sha) || format('skillpulse-backend:{0}', github.sha) }}
@@ -37,6 +108,8 @@ jobs:
         with:
           context: ./frontend
           push: ${{ vars.DEPLOY_ENABLED == 'true' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME != '' && format('{0}/skillpulse-frontend:latest', secrets.DOCKERHUB_USERNAME) || 'skillpulse-frontend:latest' }}
             ${{ secrets.DOCKERHUB_USERNAME != '' && format('{0}/skillpulse-frontend:{1}', secrets.DOCKERHUB_USERNAME, github.sha) || format('skillpulse-frontend:{0}', github.sha) }}
