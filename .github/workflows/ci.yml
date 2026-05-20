@@ -117,19 +117,21 @@ jobs:
      
       - name: Update kubeconfig 
         run: | 
-           aws eks update-kubeconfig 
-           --region ${{ vars.AWS_REGION }} 
+           aws eks update-kubeconfig \
+           --region ${{ vars.AWS_REGION }} \
            --name dev-skillpulse-eks
-      
+      - name: Create namespace
+        run: kubectl apply -f k8s/00-namespace.yaml
+        
       - name: Create DB Secret 
         run: | 
-          kubectl create secret generic skillpulse-db 
-          --namespace skillpulse 
-          --from-literal=MYSQL_HOST=${{ env.RDS_ENDPOINT }} 
-          --from-literal=MYSQL_PORT=3306 
-          --from-literal=MYSQL_DATABASE=skillpulse 
-          --from-literal=MYSQL_USER=skillpulse 
-          --from-literal=MYSQL_PASSWORD=${{ secrets.DB_PASSWORD }} 
+          kubectl create secret generic skillpulse-db \
+          --namespace skillpulse \
+          --from-literal=MYSQL_HOST=${{ env.RDS_ENDPOINT }} \
+          --from-literal=MYSQL_PORT=3306 \
+          --from-literal=MYSQL_DATABASE=skillpulse \
+          --from-literal=MYSQL_USER=skillpulse \
+          --from-literal=MYSQL_PASSWORD=${{ secrets.DB_PASSWORD }} \
           --dry-run=client -o yaml | kubectl apply -f -
             
 
