@@ -10,6 +10,9 @@ Thumbs.db
 # Local env files
 .env
 .env.local
+**/.terraform/*
+*.tfstate
+*.tfstate.*
 
 # Logs
 *.log

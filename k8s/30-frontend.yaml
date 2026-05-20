@@ -7,14 +7,14 @@ metadata:
   labels:
     app: frontend
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: frontend
   ports:
     - name: http
       port: 80
       targetPort: 80
-      nodePort: 30080
+      LoadBalancer: 30080
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: trainwithshubham/skillpulse-frontend:latest
+          image: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/dev-skillpulse-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
