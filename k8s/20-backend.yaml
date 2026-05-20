@@ -39,7 +39,7 @@ spec:
               containerPort: 8080
           env:
             - name: DB_HOST
-              value: ${{ env.RDS_ENDPOINT }}
+              value: dev-skillpulse-mysql.cfsc226yk2pr.us-west-2.rds.amazonaws.com
             - name: DB_PORT
               value: "3306"
             - name: PORT
