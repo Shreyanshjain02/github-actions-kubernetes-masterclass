@@ -121,6 +121,7 @@ jobs:
            --region ${{ vars.AWS_REGION }} \
            --name dev-skillpulse-eks
       - name: Create namespace
+        working-directory: .
         run: kubectl apply -f k8s/00-namespace.yaml
         
       - name: Create DB Secret 
