@@ -120,6 +120,7 @@ jobs:
            aws eks update-kubeconfig \
            --region ${{ vars.AWS_REGION }} \
            --name dev-skillpulse-eks
+           
       - name: Create namespace
         working-directory: .
         run: kubectl apply -f k8s/00-namespace.yaml
@@ -131,7 +132,7 @@ jobs:
           --from-literal=MYSQL_HOST=${{ env.RDS_ENDPOINT }} \
           --from-literal=MYSQL_PORT=3306 \
           --from-literal=MYSQL_DATABASE=skillpulse \
-          --from-literal=MYSQL_USER=skillpulse \
+          --from-literal=MYSQL_USER=admin \
           --from-literal=MYSQL_PASSWORD=${{ secrets.DB_PASSWORD }} \
           --dry-run=client -o yaml | kubectl apply -f -
             
