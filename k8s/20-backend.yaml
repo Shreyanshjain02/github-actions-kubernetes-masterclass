@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: REPL_AWS_ACCOUNT_ID.dkr.ecr.REPL_AWS_://amazonaws.com/dev-skillpulse-backend:latest
+          image: REPL_AWS_ACCOUNT_ID.dkr.ecr.REPL_AWS_REGION://amazonaws.com/dev-skillpulse-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
