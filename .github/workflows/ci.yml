@@ -109,8 +109,10 @@ jobs:
 
       - name: Get Terraform Outputs 
         id: terraform         
-        run: | 
-            echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)" >> $GITHUB_ENV
+        run: |
+          RAW_ENDPOINT=$(terraform output -raw rds_endpoint)
+          # Strips the colon and port number from the end
+          echo "RDS_ENDPOINT=${RAW_ENDPOINT%%:*}" >> $GITHUB_ENV
       
       - name: Setup kubectl 
         uses: azure/setup-kubectl@v4 
