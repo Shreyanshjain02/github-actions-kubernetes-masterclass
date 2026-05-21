@@ -135,7 +135,21 @@ jobs:
           --from-literal=MYSQL_USER=admin \
           --from-literal=MYSQL_PASSWORD=${{ secrets.DB_PASSWORD }} \
           --dry-run=client -o yaml | kubectl apply -f -
-            
+
+       - name: Install MySQL Client
+         run: |
+              sudo apt-get update 
+              sudo apt-get install -y mysql-client-core-8.0
+         
+       - name: Run SQL Initialization Scripts
+         working-directory: ./mysql
+         env:
+            DB_HOST: ${{ env.RDS_ENDPOINT }}
+            DB_USER: admin
+            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+            DB_NAME: skillpulse
+         run: |
+              mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "source init.sql"
 
   build-and-push:
     needs:
